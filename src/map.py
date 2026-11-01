@@ -6,7 +6,7 @@ class Tile(pygame.sprite.Sprite):
     """Individual tile sprite"""
     def __init__(self, x, y, tile_type):
         super().__init__()
-        self.tile_type = tile_type  # 0 = grass, 1 = wall
+        self.tile_type = tile_type  # 0 = grass, 1 = wall, 2 = door
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
         
         # Color based on tile type
@@ -14,6 +14,8 @@ class Tile(pygame.sprite.Sprite):
             self.image.fill((34, 139, 34))  # Forest green
         elif tile_type == 1:  # Wall
             self.image.fill((101, 67, 33))  # Brown
+        elif tile_type == 2:  # Door
+            self.image.fill((255, 215, 0))  # Gold
         
         self.rect = self.image.get_rect(topleft=(x, y))
 
@@ -22,6 +24,7 @@ class TileMap:
     def __init__(self, csv_path):
         self.tiles = []
         self.collision_rects = []
+        self.doors = []  # List of door rects
         self.load_map(csv_path)
     
     def load_map(self, csv_path):
@@ -40,6 +43,9 @@ class TileMap:
                     # Walls are collidable
                     if tile_type == 1:
                         self.collision_rects.append(tile.rect)
+                    # Doors are interactive
+                    elif tile_type == 2:
+                        self.doors.append(tile.rect)
     
     def draw(self, surface):
         """Draw all tiles"""
@@ -52,4 +58,11 @@ class TileMap:
             if rect.colliderect(wall_rect):
                 return True
         return False
+    
+    def check_door_collision(self, rect):
+        """Check if rect collides with a door and return it"""
+        for door_rect in self.doors:
+            if rect.colliderect(door_rect):
+                return door_rect
+        return None
 
